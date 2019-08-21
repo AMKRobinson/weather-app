@@ -26,15 +26,18 @@ const fetchWeatherPromises = [Fetch.get('/weather/seattle'), Fetch.get('/weather
 Promise.all(fetchWeatherPromises)
   .then(results => {
     results.forEach(weatherResult => {
+      console.log(weatherResult);
       processWeather(weatherResult);
     });
   });
 
 function processWeather(weather) {
   let latestWeather = weather.consolidated_weather[weather.consolidated_weather.length - 1];
-
-  weatherData.appendChild(createTextEl('h1', weather.title));
-  weatherData.appendChild(createWeatherList(latestWeather));
+  let location = document.createElement('div');
+  location.setAttribute('class', 'weather');
+  location.appendChild(createTextEl('h1', weather.title));
+  location.appendChild(createWeatherList(latestWeather));
+  weatherData.appendChild(location);
 }
 
 function createWeatherList(latestWeather) {
