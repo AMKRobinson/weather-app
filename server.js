@@ -4,7 +4,7 @@ const port = 3000;
 const fetch = require('node-fetch');
 const baseUrl = 'https://www.metaweather.com/api';
 
-app.use(express.static('public'));
+app.use(express.static('dist'));
 
 app.get('/weather/seattle', (req, res) => {
   getWeather(`/location/2490383/`)

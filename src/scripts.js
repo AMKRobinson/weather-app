@@ -1,4 +1,7 @@
-
+require('./style.css');
+const ReactDom = require('react-dom');
+const React = require('react');
+const Component = React.Component;
 // getting the app div that houses html elements created in js
 
 const app = document.getElementById('app');
@@ -22,14 +25,6 @@ FetchHttp.prototype.get = function(path) {
 };
 
 const Fetch = new FetchHttp();
-const fetchWeatherPromises = [Fetch.get('/weather/seattle'), Fetch.get('/weather/sanfran')];
-Promise.all(fetchWeatherPromises)
-  .then(results => {
-    results.forEach(weatherResult => {
-      console.log(weatherResult);
-      processWeather(weatherResult);
-    });
-  });
 
 function processWeather(weather) {
   let latestWeather = weather.consolidated_weather[weather.consolidated_weather.length - 1];
@@ -37,7 +32,8 @@ function processWeather(weather) {
   location.setAttribute('class', 'weather');
   location.appendChild(createTextEl('h1', weather.title));
   location.appendChild(createWeatherList(latestWeather));
-  weatherData.appendChild(location);
+  // weatherData.appendChild(location);
+  return location;
 }
 
 function createWeatherList(latestWeather) {
@@ -56,3 +52,33 @@ function createTextEl(elName, text) {
   el.appendChild(document.createTextNode(text))
   return el;
 }
+
+class App extends Component {
+  constructor() {
+    super();
+  }
+  componentDidMount() {
+    const fetchWeatherPromises = [Fetch.get('/weather/seattle'), Fetch.get('/weather/sanfran')];
+    Promise.all(fetchWeatherPromises)
+      .then(results => {
+        results.forEach(weatherResult => {
+          console.log(weatherResult);
+          const el = document.getElementById('elementInReactClass');
+          let singleLocation = processWeather(weatherResult);
+          el.appendChild(singleLocation)
+        });
+      });
+  }
+  render() {
+    return (
+      <div>
+        <h1>
+          HI
+        </h1>
+        <div id="elementInReactClass"></div>
+      </div>
+    )
+  }
+}
+
+ReactDom.render(<App/>, app)
