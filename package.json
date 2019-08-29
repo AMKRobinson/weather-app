@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "npm test",
-    "start": "node server.js"
+    "start": "node server.js",
+    "build-dev": "./node_modules/webpack/bin/webpack.js --mode development"
   },
   "author": "your name",
   "license": "ISC",
