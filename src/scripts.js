@@ -1,16 +1,11 @@
 require('./style.css');
+
 const ReactDom = require('react-dom');
 const React = require('react');
 const Component = React.Component;
 // getting the app div that houses html elements created in js
 
 const app = document.getElementById('app');
-
-const weatherData = document.createElement('div');
-
-weatherData.setAttribute('id', 'weather-data');
-
-app.appendChild(weatherData);
 
 function FetchHttp() {
 }
@@ -26,48 +21,76 @@ FetchHttp.prototype.get = function(path) {
 
 const Fetch = new FetchHttp();
 
-function processWeather(weather) {
-  let latestWeather = weather.consolidated_weather[weather.consolidated_weather.length - 1];
-  let location = document.createElement('div');
-  location.setAttribute('class', 'weather');
-  location.appendChild(createTextEl('h1', weather.title));
-  location.appendChild(createWeatherList(latestWeather));
-  // weatherData.appendChild(location);
-  return location;
-}
 
-function createWeatherList(latestWeather) {
-  let ul = document.createElement('ul');
-  let props = ['the_temp','visibility', 'weather_state_name', 'wind_direction'];
-  for (let i = 0; i < props.length; i++) {
-    let textContent = `${props[i]}: ${latestWeather[props[i]]}` ;
-    let li = createTextEl('li', textContent);
-    ul.appendChild(li);
+class PropertyList extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      object: props.object
+    }
   }
-  return ul;
+
+  render() {
+    return (
+      <ul>
+        {Object.keys(this.state.object).map((prop, i) => {
+          return (
+            <li key={i}>{prop}: {this.state.object[prop]}</li>
+          );
+        })}
+      </ul>
+    )
+  }
 }
 
-function createTextEl(elName, text) {
-  let el = document.createElement(elName);
-  el.appendChild(document.createTextNode(text))
-  return el;
+class Location extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      weather: null,
+      path: props.path,
+      location: '',
+      isLoading: true
+    }
+  }
+  componentDidMount() {
+    this.setState({
+      isLoading: true
+    });
+    Fetch.get(this.state.path)
+      .then(results => {
+        console.log(results);
+        this.setState({
+          weather: results.consolidated_weather[results.consolidated_weather.length - 1],
+          location: results.title,
+          isLoading: false
+        });
+      });
+  }
+  render() {
+    let style = {
+      border: '1px solid #000'
+    };
+    return (
+      <div>
+        {this.state.isLoading ? '' :
+          <div style={style}>
+            <h1>{this.state.location}</h1>
+
+            <PropertyList
+              object={this.state.weather}
+            />
+          </div>
+        }
+      </div>
+    );
+  }
 }
+
 
 class App extends Component {
   constructor() {
     super();
-  }
-  componentDidMount() {
-    const fetchWeatherPromises = [Fetch.get('/weather/seattle'), Fetch.get('/weather/sanfran')];
-    Promise.all(fetchWeatherPromises)
-      .then(results => {
-        results.forEach(weatherResult => {
-          console.log(weatherResult);
-          const el = document.getElementById('elementInReactClass');
-          let singleLocation = processWeather(weatherResult);
-          el.appendChild(singleLocation)
-        });
-      });
   }
   render() {
     return (
@@ -75,9 +98,10 @@ class App extends Component {
         <h1>
           HI
         </h1>
-        <div id="elementInReactClass"></div>
+        <Location path={'/weather/seattle'} />
+        <Location path={'/weather/sanfran'} />
       </div>
-    )
+    );
   }
 }
 
